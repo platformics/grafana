@@ -331,9 +331,6 @@ containers:
     volumeMounts:
       - name: sc-alerts-volume
         mountPath: "/etc/grafana/provisioning/alerting"
-      {{- with .Values.sidecar.alerts.extraMounts }}
-      {{- toYaml . | trim | nindent 6 }}
-      {{- end }}        
 {{- end}}
 {{- if .Values.sidecar.dashboards.enabled }}
   - name: {{ include "grafana.name" . }}-sc-dashboard
@@ -388,7 +385,6 @@ containers:
       - name: SCRIPT
         value: "{{ . }}"
       {{- end }}
-      {{- if not .Values.sidecar.dashboards.skipReload }}
       {{- if and (not .Values.env.GF_SECURITY_ADMIN_USER) (not .Values.env.GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION) }}
       - name: REQ_USERNAME
         valueFrom:
@@ -403,6 +399,7 @@ containers:
             name: {{ (tpl .Values.admin.existingSecret .) | default (include "grafana.fullname" .) }}
             key: {{ .Values.admin.passwordKey | default "admin-password" }}
       {{- end }}
+      {{- if not .Values.sidecar.dashboards.skipReload }}
       - name: REQ_URL
         value: {{ .Values.sidecar.dashboards.reloadURL }}
       - name: REQ_METHOD
